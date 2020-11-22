@@ -11,7 +11,7 @@ from src.routes.users import (
     reset_password_router,
     users_router
 )
-# from src.routes.classes import classes_router
+from src.routes.classes import classes_router
 # from src.routes.image_data import image_data_router
 # from src.routes.tasks import tasks_router
 
@@ -31,11 +31,11 @@ async def shutdown_db_client():
     # stop your client here
     pass
 
-# # classes routes
-# app.include_router(
-#     classes_router,
-#     prefix="/classes"
-# )
+# classes routes
+app.include_router(
+    classes_router,
+    prefix="/classes"
+)
 #
 # # image data routes
 # app.include_router(
