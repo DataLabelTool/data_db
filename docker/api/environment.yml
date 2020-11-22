@@ -1,0 +1,27 @@
+name: data_store
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.8
+  - future
+  - setuptools
+  - six
+  - attrs
+  - typing
+  - typing-extensions
+  - pip:
+      - numpy
+      - requests
+      - jinja2==2.11.2
+      - uvicorn==0.11.8
+      - fastapi==0.61.0
+      - fastapi_users
+      - starlette==0.13.6
+      - pydantic>=1.6.0
+      - pydantic[email]
+      - python-multipart
+      - uvloop>=0.14.0
+      - aiofiles>=0.6.0
+      - pymongo
+      - motor

@@ -22,3 +22,7 @@ MONGOEXPRESS_PORT=8081
 cd docker
 docker-compose up -d
 ```
+
+## todo:
+
+- создание первого пользователя админа
