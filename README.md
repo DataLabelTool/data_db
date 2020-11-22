@@ -25,4 +25,6 @@ docker-compose up -d
 
 ## todo:
 
-- создание первого пользователя админа
+- implement User roles functionality.
+- implement ImageData routes.
+- Fix TODOs in tasks.  
