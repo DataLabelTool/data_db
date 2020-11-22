@@ -24,11 +24,17 @@ async def set_classes_data(
         classes: List[ClassSchema] = Body(...),
         user: User = Depends(fastapi_users.get_current_active_user)
 ):
-    #TODO: we should check permissions correctly
-    if not user.is_superuser:
+    if user.can_set_classes(db_name=db_name):
         classes = jsonable_encoder(classes)
         new_classes = await set_classes(classes, db_name)
-        return ResponseModel(new_classes, "Classes added successfully.")
+        if new_classes:
+            return ResponseModel(new_classes, "Classes added successfully.")
+        else:
+            return ErrorResponseModel(
+                "An error occurred",
+                404,
+                "db_name {0} doesn't exist".format(id)
+            )
     else:
         return ErrorResponseModel(
             "An error occurred",
@@ -40,10 +46,9 @@ async def set_classes_data(
 @classes_router.get("/", response_description="Classes data retrieved")
 async def get_classes_data(
         db_name: str,
-        user: User = Depends(fastapi_users.get_current_user)
+        user: User = Depends(fastapi_users.get_current_active_user)
 ) -> ResponseModel:
-    # TODO: we should check permissions correctly
-    if user.is_superuser:
+    if user.can_get_classes(db_name=db_name):
         classes = await get_classes(db_name=db_name)
         if classes:
             return ResponseModel(classes, "Classes data retrieved successfully")

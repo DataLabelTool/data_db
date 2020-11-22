@@ -12,8 +12,8 @@ from src.routes.users import (
     users_router
 )
 from src.routes.classes import classes_router
-# from src.routes.image_data import image_data_router
-# from src.routes.tasks import tasks_router
+from src.routes.image_data import image_data_router
+from src.routes.tasks import tasks_router, dbs_router
 
 app = FastAPI(
     title="data_db",
@@ -36,40 +36,20 @@ app.include_router(
     classes_router,
     prefix="/classes"
 )
-#
-# # image data routes
-# app.include_router(
-#     image_data_router,
-#     prefix="/image_data"
-# )
-# # tasks data routes
-# app.include_router(
-#     tasks_router,
-#     prefix="/tasks"
-# )
+
+# image data routes
+app.include_router(image_data_router, prefix="/image_data")
+# tasks data routes
+app.include_router(tasks_router, prefix="/tasks")
+# dbs data routes
+app.include_router(dbs_router, prefix="/dbs")
 
 
 # users routers
-app.include_router(
-    jwt_auth_router,
-    prefix="/auth/jwt",
-    tags=["auth"]
-)
-app.include_router(
-    register_router,
-    prefix="/auth",
-    tags=["auth"]
-)
-# app.include_router(
-#     reset_password_router,
-#     prefix="/auth",
-#     tags=["auth"]
-# )
-app.include_router(
-    users_router,
-    prefix="/users",
-    tags=["users"]
-)
+app.include_router(jwt_auth_router, prefix="/auth/jwt", tags=["auth"])
+app.include_router(register_router, prefix="/auth", tags=["auth"])
+# app.include_router(reset_password_router, prefix="/auth", tags=["auth"])
+app.include_router(users_router, prefix="/users", tags=["users"])
 
 """
 uvicorn src.api:app --port 8081 --host 0.0.0.0 --reload
