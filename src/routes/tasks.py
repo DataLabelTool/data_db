@@ -47,7 +47,7 @@ async def add_task_route(
         if user.can_add_tasks(db_name=db_name):
             result = await add_task(db_name=db_name, task_name=task_name)
             if result:
-                ResponseModel(result, "task add successfully")
+                return ResponseModel(result, "task add successfully")
             else:
                 return ErrorResponseModel(
                     "An error occurred",
@@ -79,7 +79,7 @@ async def delete_task_route(
         if user.can_delete_tasks(db_name=db_name):
             result = await delete_task(db_name=db_name, task_name=task_name)
             if result:
-                ResponseModel(result, "tasks deleted successfully")
+                return ResponseModel(result, "tasks deleted successfully")
             else:
                 return ErrorResponseModel(
                     "An error occurred",
@@ -112,9 +112,9 @@ async def add_db_route(
     """"""
     try:
         if user.can_add_dbs():
-            result = await add_db(db_name=db_name)
+            result = await add_db(db_name=db_name, user=user)
             if result:
-                ResponseModel(result, "db add successfully")
+                return ResponseModel(result, "db add successfully")
             else:
                 return ErrorResponseModel(
                     "An error occurred",
@@ -144,7 +144,7 @@ async def delete_db_route(
         if user.can_delete_dbs():
             result = await delete_db(db_name=db_name)
             if result:
-                ResponseModel(result, "db deleted successfully")
+                return ResponseModel(result, "db deleted successfully")
             else:
                 return ErrorResponseModel(
                     "An error occurred",

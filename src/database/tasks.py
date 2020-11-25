@@ -1,4 +1,5 @@
 from typing import Dict, List
+from datetime import datetime
 from src.database.base import client
 from src.database.classes import set_classes
 from src.database.users import user_db
@@ -12,7 +13,7 @@ async def get_dbs() -> List[str]:
     :param db_name:
     :return:
     """
-    db_names = await client.database_names()
+    db_names = await client.list_database_names()
     db_system_names = ['admin', 'config', 'data_users', 'local']
     # exclude system names
     db_names = list(filter(lambda x: x not in db_system_names, db_names))
@@ -54,7 +55,7 @@ async def add_task(db_name: str, task_name: str) -> bool:
     #TODO: edit user rules after add task
     assert task_name not in ['classes'], "Can't add task with this name"
     assert db_name not in ['admin', 'config', 'data_users', 'local'], "Can't add db with system name"
-    db_names = await client.database_names()
+    db_names = await client.list_database_names()
     assert db_name not in db_names, "DB already exist"
     data_db = client[db_name]
     result = await data_db.insert_one([])  #TODO: we should check it
@@ -73,7 +74,7 @@ async def delete_task(db_name: str, task_name: str) -> bool:
     #TODO: we should clean user roles before delete task
     assert task_name not in ['classes'], "Can't delete task with this name"
     assert db_name not in ['admin', 'config', 'data_users', 'local'], "Can't add db with system name"
-    db_names = await client.database_names()
+    db_names = await client.list_database_names()
     assert db_name in db_names, "DB not exist"
     data_db = client[db_name]
     task_names = await data_db.list_collection_names()
@@ -82,16 +83,25 @@ async def delete_task(db_name: str, task_name: str) -> bool:
     return True
 
 
-async def add_db(db_name: str) -> bool:
+async def add_db(db_name: str, user: User) -> bool:
     """
     :param db_name:
     :return:
     """
     assert db_name not in ['admin', 'config', 'data_users', 'local'], "Can't add db with system name"
-    db_names = await client.database_names()
+    db_names = await client.list_database_names()
     assert db_name not in db_names, "DB already exist"
-    result = await set_classes(classes_data=[], db_name=db_name)
-    return True
+    new_db = client[db_name]
+    info_collection = new_db['info']
+    info = {
+        "created_by": user.id,
+        "enterdate": datetime.now(),
+    }
+    result = await info_collection.insert_one(info)
+    if result:
+        return True
+    else:
+        return False
 
 
 async def delete_db(db_name: str) -> bool:
@@ -101,7 +111,7 @@ async def delete_db(db_name: str) -> bool:
     """
     #TODO: we should clean user roles before delete db
     assert db_name not in ['admin', 'config', 'data_users', 'local'], "Can't delete system db"
-    db_names = await client.database_names()
+    db_names = await client.list_database_names()
     assert db_name in db_names, "DB doesn't exist"
     result = await client.drop_database(db_name)
     return True

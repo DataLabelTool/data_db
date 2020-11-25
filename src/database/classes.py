@@ -31,9 +31,9 @@ async def set_classes(classes_data: List[ClassSchema], db_name: str) -> str:
     classes_collection = database.get_collection("classes")
     num_documents = await classes_collection.count_documents({})
     if num_documents > 0:
-        result = await classes_collection.replace_one({}, classes_data)
+        result = await classes_collection.replace_many({}, classes_data)
     else:
-        result = await classes_collection.insert_one(classes_data)
+        result = await classes_collection.insert_many(classes_data)
 
     return result.inserted_id
 

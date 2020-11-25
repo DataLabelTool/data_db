@@ -1,5 +1,18 @@
-from typing import Optional, Union, List
-from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, Union, List, Dict
+from bson.objectid import ObjectId
+from pydantic import BaseModel, Field
+
+
+class PydanticObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not isinstance(v, ObjectId):
+            raise TypeError('ObjectId required')
+        return str(v)
 
 
 class DataSchema(BaseModel):
@@ -8,10 +21,10 @@ class DataSchema(BaseModel):
 
 
 class ItemSchema(BaseModel):
+    id: PydanticObjectId = Field(...)
     class_name: Optional[str] = Field(...)
     bbox: Optional[DataSchema] = Field(...)
     mask: Optional[DataSchema] = Field(...)
-    childs: Optional[List] = Field(...)
 
     class Config:
         schema_extra = {
@@ -26,12 +39,14 @@ class ItemSchema(BaseModel):
 class ImageDataSchema(BaseModel):
     image: DataSchema = Field(...)
     items: List[ItemSchema] = Field(...)
+    items_graph: Dict[PydanticObjectId, List[PydanticObjectId]] = Field(...)
 
     class Config:
         schema_extra = {
             "example": {
                 "image": {"data": "image data", "type": "data_type"},
                 "items": [],
+                "items_graph": {}
             }
         }
 
@@ -39,12 +54,14 @@ class ImageDataSchema(BaseModel):
 class UpdateImageDataModel(BaseModel):
     image: DataSchema = Field(...)
     items: List[ItemSchema] = Field(...)
+    items_graph: Dict[PydanticObjectId, List[PydanticObjectId]] = Field(...)
 
     class Config:
         schema_extra = {
             "example": {
                 "image": {"data": "image data", "type": "data_type"},
                 "items": [],
+                "items_graph": []
             }
         }
 

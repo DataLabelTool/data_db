@@ -1,11 +1,12 @@
 from pydantic import BaseModel, Field
-from typing import Dict, List
+from typing import Dict, List, Optional
 from fastapi_users import models
 
 
 class User(models.BaseUser):
+
     roles_db: List[str] = Field(
-        default={},
+        default=[],
         description="roles in db: add, delete"
     )
     roles_tasks: Dict[str, List[str]] = Field(
@@ -155,7 +156,16 @@ class User(models.BaseUser):
 
 
 class UserCreate(models.BaseUserCreate):
-    pass
+
+    def create_update_dict(self):
+        return self.dict(
+            exclude_unset=True,
+            exclude={
+                "id", "is_superuser", "is_active", "oauth_accounts",
+                "roles_db", "roles_tasks", "roles_classes", "roles_image_data"
+            },
+        )
+
 
 class UserUpdate(User, models.BaseUserUpdate):
     pass
