@@ -19,23 +19,23 @@ async def get_image_data(db_name: str, task_name: str, id: str) -> dict:
 
 
 # Update image_data with a matching ID
-async def update_image_data(db_name: str, task_name: str, id: str, data: dict, check_protected: bool = False):
+async def update_image_data(db_name: str, task_name: str, id: str, image_data: dict, check_protected: bool = False):
     # Return false if an empty request body is sent.
-    if len(data) < 1:
+    if len(image_data) < 1:
         return False
 
     database = client[db_name]
     image_data_collection = database.get_collection(task_name)
     image_data_left = await image_data_collection.find_one({'_id': ObjectId(id)})
     if image_data_left is not None:
-        if not check_protected or image_data_check_protected(image_data_left, data):
+        if not check_protected or image_data_check_protected(image_data_left, image_data):
             updated_image_data = await image_data_collection.update_one(
-                {'_id': ObjectId(id)}, {"$set": data}
+                {'_id': ObjectId(id)}, {"$set": image_data}
             )
         else:
             return False
     else:
-        updated_image_data = image_data_collection.insert_one(data)
+        updated_image_data = image_data_collection.insert_one(image_data)
 
     if updated_image_data:
         return True
