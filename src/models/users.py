@@ -179,7 +179,7 @@ class UserUpdate(User, models.BaseUserUpdate):
             exclude_unset=True,
             exclude={
                 "id", "is_superuser", "is_active", "oauth_accounts",
-                # "roles", "roles_db", "roles_tasks", "roles_classes", "roles_image_data"
+                "roles", "roles_db", "roles_tasks", "roles_classes", "roles_image_data"
             },
         )
 
