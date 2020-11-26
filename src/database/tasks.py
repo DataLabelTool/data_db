@@ -20,13 +20,13 @@ async def get_dbs() -> List[str]:
     return db_names
 
 
-async def get_tasks(user: User= None) -> DBSchema:
+async def get_tasks(user: User = None) -> DBSchema:
     """
 
     :param db_name:
     :return:
     """
-    if user is None:
+    if user is None or user.is_superuser:
         db_names = get_dbs()
         tasks = []
         for db_name in db_names:
@@ -36,6 +36,7 @@ async def get_tasks(user: User= None) -> DBSchema:
             tasks.append(TaskSchema(db_name=db_name, task_names=task_names))
         return DBSchema(db_names=tasks)
     else:
+        print('user is not none')
         tasks = []
         for db_name, db_tasks in user.roles_image_data.items():
             task_names = db_tasks.keys()

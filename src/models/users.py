@@ -1,23 +1,23 @@
-from pydantic import BaseModel, Field
-from typing import Dict, List, Optional
+from pydantic import BaseModel, Field, ValidationError, validator
+from typing import Dict, List, Optional, Set
 from fastapi_users import models
 
 
 class User(models.BaseUser):
 
-    roles_db: List[str] = Field(
+    roles_db: Set[str] = Field(
         default=[],
         description="roles in db: add, delete"
     )
-    roles_tasks: Dict[str, List[str]] = Field(
+    roles_tasks: Dict[str, Set[str]] = Field(
         default={},
         description="roles in db task: add, delete"
     )
-    roles_classes: Dict[str, List[str]] = Field(
+    roles_classes: Dict[str, Set[str]] = Field(
         default={},
         description="roles in db classes: set, get"
     )
-    roles_image_data: Dict[str, Dict[str, List[str]]] = Field(
+    roles_image_data: Dict[str, Dict[str, Set[str]]] = Field(
         default={},
         description="roles in db tasks with image_data: get, edit, edit_protected, add, delete"
     )
@@ -90,7 +90,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, [])
+                roles_task_lvl = roles_db_lvl.get(task_name, set())
                 if len(roles_task_lvl) and 'can_get' in roles_task_lvl:
                     return True
                 else:
@@ -104,7 +104,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, [])
+                roles_task_lvl = roles_db_lvl.get(task_name, set())
                 if len(roles_task_lvl) and 'can_edit' in roles_task_lvl:
                     return True
                 else:
@@ -118,7 +118,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, [])
+                roles_task_lvl = roles_db_lvl.get(task_name, set())
                 if len(roles_task_lvl) and 'can_edit_protected' in roles_task_lvl:
                     return True
                 else:
@@ -132,7 +132,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, [])
+                roles_task_lvl = roles_db_lvl.get(task_name, set())
                 if len(roles_task_lvl) and 'can_add' in roles_task_lvl:
                     return True
                 else:
@@ -146,7 +146,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, [])
+                roles_task_lvl = roles_db_lvl.get(task_name, set())
                 if len(roles_task_lvl) and 'can_delete' in roles_task_lvl:
                     return True
                 else:
@@ -162,13 +162,26 @@ class UserCreate(models.BaseUserCreate):
             exclude_unset=True,
             exclude={
                 "id", "is_superuser", "is_active", "oauth_accounts",
-                "roles_db", "roles_tasks", "roles_classes", "roles_image_data"
+                "roles", "roles_db", "roles_tasks", "roles_classes", "roles_image_data"
             },
         )
 
+    @validator('password')
+    def valid_password(cls, v: str):
+        if len(v) < 5:
+            raise ValidationError('Password should be at least 5 characters')
+        return v
+
 
 class UserUpdate(User, models.BaseUserUpdate):
-    pass
+    def create_update_dict(self):
+        return self.dict(
+            exclude_unset=True,
+            exclude={
+                "id", "is_superuser", "is_active", "oauth_accounts",
+                # "roles", "roles_db", "roles_tasks", "roles_classes", "roles_image_data"
+            },
+        )
 
 
 class UserDB(User, models.BaseUserDB):

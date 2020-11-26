@@ -1,15 +1,17 @@
+import os
 import requests
 from fastapi import FastAPI
 from src.version import version
 from src.utils import project_root, base_url
+from src.database.users import count_superusers
 
-from src.database.users import create_first_admin
-
+from src.models.users import UserCreate
 from src.routes.users import (
     jwt_auth_router,
     register_router,
     reset_password_router,
-    users_router
+    fastapi_users,
+    users_router,
 )
 from src.routes.classes import classes_router
 from src.routes.image_data import image_data_router
@@ -24,7 +26,15 @@ app = FastAPI(
 @app.on_event("startup")
 async def create_db_client():
     # start client here and reuse in future requests
-    success = await create_first_admin()
+    count = await count_superusers()
+    if count == 0:
+        superuser = await fastapi_users.create_user(
+            UserCreate(
+                email=os.getenv('API_ADMIN_EMAIL', 'admin@admin.com'),
+                password=os.getenv('API_ADMIN_PASSWORD', 'adminpassword'),
+                is_superuser=True,
+            )
+        )
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
