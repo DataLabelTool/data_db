@@ -132,9 +132,9 @@ async def add_db(db_name: str, user: User) -> bool:
     }
     result = await info_collection.insert_one(info)
     if result:
-        # can add and get classes
+        print('add classes')
         await set_roles_classes(db_name=db_name, permissions=['can_get', 'can_set'], user=user)
-        # can add and delete tasks
+        print('add tasks')
         await set_roles_tasks(db_name=db_name, permissions=['can_add', 'can_delete'], user=user)
         return True
     else:

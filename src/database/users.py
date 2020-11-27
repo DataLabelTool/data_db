@@ -16,6 +16,19 @@ async def count_superusers() -> bool:
     return count
 
 
+def remove_from_list(arr, val):
+    arr = list(set(arr))
+    try:
+        arr.remove(val)
+    except ValueError as e:
+        pass
+    return arr
+
+
+def add_to_list(arr, val):
+    arr.append(val)
+    return list(set(arr))
+
 # dbs
 async def set_roles_db(permissions: Union[str, List[str]], user: UserDB):
     if isinstance(permissions, str):
@@ -23,8 +36,9 @@ async def set_roles_db(permissions: Union[str, List[str]], user: UserDB):
 
     for permission in permissions:
         assert permission in ['can_add', 'can_delete'], "Unknown permission"
-        user.roles_db.add(permission)
+        user.roles_db = add_to_list(user.roles_db, permission)
     updated_user = await user_db.update(user)
+    return updated_user
 
 
 async def unset_roles_db(permissions: Union[str, List[str]], user: UserDB):
@@ -33,8 +47,9 @@ async def unset_roles_db(permissions: Union[str, List[str]], user: UserDB):
 
     for permission in permissions:
         assert permission in ['can_add', 'can_delete'], "Unknown permission"
-        user.roles_db.discard(permission)
+        user.roles_db = remove_from_list(user.roles_db, permission)
     updated_user = await user_db.update(user)
+    return updated_user
 
 
 # tasks
@@ -44,9 +59,12 @@ async def set_roles_tasks(db_name: str, permissions: Union[str, List[str]], user
 
     for permission in permissions:
         assert permission in ['can_add', 'can_delete'], "Unknown permission"
-        roles_tasks = user.roles_tasks.get(db_name, set()).add(permission)
-        user.roles_tasks[db_name] = roles_tasks
+        user.roles_tasks[db_name] = add_to_list(
+            user.roles_tasks.get(db_name, []),
+            permission
+        )
     updated_user = await user_db.update(user)
+    return updated_user
 
 
 async def unset_roles_tasks(db_name: str, permissions: Union[str, List[str]], user: UserDB):
@@ -55,12 +73,13 @@ async def unset_roles_tasks(db_name: str, permissions: Union[str, List[str]], us
 
     for permission in permissions:
         assert permission in ['can_add', 'can_delete'], "Unknown permission"
-        roles_tasks = user.roles_tasks.get(db_name, set()).discard(permission)
+        roles_tasks = remove_from_list(user.roles_tasks.get(db_name, []), permission)
         if len(roles_tasks) > 0:
             user.roles_tasks[db_name] = roles_tasks
         else:
             user.roles_tasks.pop(db_name, None)
     updated_user = await user_db.update(user)
+    return updated_user
 
 # classes
 async def set_roles_classes(db_name: str, permissions: Union[str, List[str]], user: UserDB):
@@ -68,9 +87,12 @@ async def set_roles_classes(db_name: str, permissions: Union[str, List[str]], us
         permissions = [permissions]
     for permission in permissions:
         assert permission in ['can_get', 'can_set'], "Unknown permission"
-        roles_classes = user.roles_classes.get(db_name, set()).add(permission)
-        user.roles_classes[db_name] = roles_classes
+        user.roles_classes[db_name] = add_to_list(
+            user.roles_classes.get(db_name, []),
+            permission
+        )
     updated_user = await user_db.update(user)
+    return updated_user
 
 
 async def unset_roles_classes(db_name: str, permissions: Union[str, List[str]], user: UserDB):
@@ -78,12 +100,16 @@ async def unset_roles_classes(db_name: str, permissions: Union[str, List[str]], 
         permissions = [permissions]
     for permission in permissions:
         assert permission in ['can_get', 'can_set'], "Unknown permission"
-        roles_classes = user.roles_classes.get(db_name, set()).discard(permission)
+        roles_classes = remove_from_list(
+            user.roles_classes.get(db_name, []),
+            permission
+        )
         if len(roles_classes) > 0:
             user.roles_classes[db_name] = roles_classes
         else:
             user.roles_classes.pop(db_name, None)
     updated_user = await user_db.update(user)
+    return updated_user
 
 
 # image_data
@@ -93,9 +119,11 @@ async def set_roles_image_data(db_name: str, task_name: str, permissions: Union[
     for permission in permissions:
         assert permission in ['can_get', 'can_edit', 'can_edit_protected', 'can_add', 'can_delete'], "Unknown permission"
         roles_image_data = user.roles_image_data.get(db_name, {})
-        roles_image_data[task_name].add(permission)
+        roles_image_data_task = add_to_list(roles_image_data.get(task_name, []), permission)
+        roles_image_data[task_name] = roles_image_data_task
         user.roles_image_data[db_name] = roles_image_data
     updated_user = await user_db.update(user)
+    return updated_user
 
 
 async def unset_roles_image_data(db_name: str, task_name: Union[str, None], permissions: Union[str, List[str]], user: UserDB):
@@ -112,7 +140,7 @@ async def unset_roles_image_data(db_name: str, task_name: Union[str, None], perm
             for task_name in task_names:
                 task_roles = roles_image_data.get(task_name, None)
                 if task_roles is not None:
-                    task_roles.discard(permission)
+                    task_roles = remove_from_list(task_roles, permission)
                     if len(task_roles) > 0:
                         user.roles_image_data[db_name][task_name] = task_roles
                     else:
@@ -122,3 +150,4 @@ async def unset_roles_image_data(db_name: str, task_name: Union[str, None], perm
         user.roles_image_data.pop(db_name, None)
 
     updated_user = await user_db.update(user)
+    return updated_user

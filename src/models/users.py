@@ -5,19 +5,19 @@ from fastapi_users import models
 
 class User(models.BaseUser):
 
-    roles_db: Set[str] = Field(
+    roles_db: List[str] = Field(
         default=[],
         description="roles in db: add, delete"
     )
-    roles_tasks: Dict[str, Set[str]] = Field(
+    roles_tasks: Dict[str, List[str]] = Field(
         default={},
         description="roles in db task: add, delete"
     )
-    roles_classes: Dict[str, Set[str]] = Field(
+    roles_classes: Dict[str, List[str]] = Field(
         default={},
-        description="roles in db classes: set, get"
+        description="roles in db classes: List, get"
     )
-    roles_image_data: Dict[str, Dict[str, Set[str]]] = Field(
+    roles_image_data: Dict[str, Dict[str, List[str]]] = Field(
         default={},
         description="roles in db tasks with image_data: get, edit, edit_protected, add, delete"
     )
@@ -90,7 +90,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, set())
+                roles_task_lvl = roles_db_lvl.get(task_name, [])
                 if len(roles_task_lvl) and 'can_get' in roles_task_lvl:
                     return True
                 else:
@@ -104,7 +104,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, set())
+                roles_task_lvl = roles_db_lvl.get(task_name, [])
                 if len(roles_task_lvl) and 'can_edit' in roles_task_lvl:
                     return True
                 else:
@@ -118,7 +118,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, set())
+                roles_task_lvl = roles_db_lvl.get(task_name, [])
                 if len(roles_task_lvl) and 'can_edit_protected' in roles_task_lvl:
                     return True
                 else:
@@ -132,7 +132,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, set())
+                roles_task_lvl = roles_db_lvl.get(task_name, [])
                 if len(roles_task_lvl) and 'can_add' in roles_task_lvl:
                     return True
                 else:
@@ -146,7 +146,7 @@ class User(models.BaseUser):
         else:
             roles_db_lvl = self.roles_image_data.get(db_name, {})
             if len(roles_db_lvl) > 0:
-                roles_task_lvl = roles_db_lvl.get(task_name, set())
+                roles_task_lvl = roles_db_lvl.get(task_name, [])
                 if len(roles_task_lvl) and 'can_delete' in roles_task_lvl:
                     return True
                 else:
