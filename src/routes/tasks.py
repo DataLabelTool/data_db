@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends
 from fastapi.encoders import jsonable_encoder
 
 from src.database.tasks import (
-    get_tasks,
+    get_user_tasks,
     add_task,
     delete_task,
     add_db,
@@ -25,7 +25,7 @@ async def get_tasks_route(
         user: User = Depends(fastapi_users.get_current_active_user)
 ):
     """return db_names and tasks available for user"""
-    tasks = await get_tasks(user)
+    tasks = await get_user_tasks(user)
     if tasks:
         return ResponseModel(tasks, "tasks data retrieved successfully")
     else:
@@ -42,10 +42,9 @@ async def add_task_route(
         task_name: str,
         user: User = Depends(fastapi_users.get_current_active_user)
 ):
-    """"""
     try:
         if user.can_add_tasks(db_name=db_name):
-            result = await add_task(db_name=db_name, task_name=task_name)
+            result = await add_task(db_name=db_name, task_name=task_name, user=user)
             if result:
                 return ResponseModel(result, "task add successfully")
             else:
@@ -66,7 +65,6 @@ async def add_task_route(
             503,
             e.__str__()
         )
-
 
 
 @tasks_router.delete("/", response_description="Task deleted from the database")
@@ -98,7 +96,6 @@ async def delete_task_route(
             503,
             e.__str__()
         )
-
 
 
 dbs_router = APIRouter()
