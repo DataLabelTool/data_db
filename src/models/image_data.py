@@ -22,9 +22,9 @@ class DataSchema(BaseModel):
 
 class ItemSchema(BaseModel):
     id: str = Field(...)  #PydanticObjectId = Field(...)
-    class_name: Optional[str] = Field(...)
-    bbox: Optional[DataSchema] = Field(...)
-    mask: Optional[DataSchema] = Field(...)
+    class_name: Optional[str] = Field(default=None)
+    bbox: Optional[DataSchema] = Field(default=None)
+    mask: Optional[DataSchema] = Field(default=None)
 
     class Config:
         schema_extra = {

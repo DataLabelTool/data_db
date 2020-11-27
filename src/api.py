@@ -42,17 +42,13 @@ async def shutdown_db_client():
     pass
 
 # classes routes
-app.include_router(
-    classes_router,
-    prefix="/classes"
-)
-
+app.include_router(classes_router, prefix="/classes", tags=["image_data"])
 # image data routes
-app.include_router(image_data_router, prefix="/image_data")
+app.include_router(image_data_router, prefix="/image_data", tags=["image_data"])
 # tasks data routes
-app.include_router(tasks_router, prefix="/tasks")
+app.include_router(tasks_router, prefix="/tasks", tags=["image_data"])
 # dbs data routes
-app.include_router(dbs_router, prefix="/dbs")
+app.include_router(dbs_router, prefix="/dbs", tags=["image_data"])
 
 
 # users routers

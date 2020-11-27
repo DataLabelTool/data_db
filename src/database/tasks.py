@@ -1,7 +1,6 @@
 from typing import Dict, List
 from datetime import datetime
 from src.database.base import client
-from src.database.classes import set_classes
 from src.database.users import (
     user_db,
     set_roles_classes, unset_roles_classes,

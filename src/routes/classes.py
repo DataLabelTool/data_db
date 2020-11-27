@@ -24,23 +24,30 @@ async def set_classes_data(
         classes: List[ClassSchema] = Body(...),
         user: User = Depends(fastapi_users.get_current_active_user)
 ):
-    if user.can_set_classes(db_name=db_name):
-        classes = jsonable_encoder(classes)
-        new_classes = await set_classes(classes, db_name)
-        print("new_classes", new_classes)
-        if new_classes:
-            return ResponseModel(new_classes, "Classes added successfully.")
+    try:
+        if user.can_set_classes(db_name=db_name):
+            classes = jsonable_encoder(classes)
+            new_classes = await set_classes(classes, db_name)
+            print("new_classes", new_classes)
+            if new_classes:
+                return ResponseModel(new_classes, "Classes added successfully.")
+            else:
+                return ErrorResponseModel(
+                    "An error occurred",
+                    404,
+                    "Can't set classes for this db"
+                )
         else:
             return ErrorResponseModel(
                 "An error occurred",
-                404,
-                "Can't set classes for this db"
+                503,
+                "User does not have admin privilegies",
             )
-    else:
+    except Exception as e:
         return ErrorResponseModel(
             "An error occurred",
             503,
-            "User does not have admin privilegies",
+            e.__str__()
         )
 
 
@@ -49,20 +56,26 @@ async def get_classes_data(
         db_name: str,
         user: User = Depends(fastapi_users.get_current_active_user)
 ) -> ResponseModel:
-    if user.can_get_classes(db_name=db_name):
-        classes = await get_classes(db_name=db_name)
-        if classes:
-            return ResponseModel(classes, "Classes data retrieved successfully")
+    try:
+        if user.can_get_classes(db_name=db_name):
+            classes = await get_classes(db_name=db_name)
+            if classes:
+                return ResponseModel(classes, "Classes data retrieved successfully")
+            else:
+                return ErrorResponseModel(
+                    "An error occurred",
+                    404,
+                    "Can't get classes for this db"
+                )
         else:
             return ErrorResponseModel(
                 "An error occurred",
-                404,
-                "Can't get classes for this db"
+                503,
+                "User does not have admin privilegies",
             )
-    else:
+    except Exception as e:
         return ErrorResponseModel(
             "An error occurred",
             503,
-            "User does not have admin privilegies",
+            e.__str__()
         )
-

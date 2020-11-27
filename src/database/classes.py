@@ -1,6 +1,7 @@
+from typing import List
 from src.database.base import client
 from src.models.classes import ClassSchema
-from typing import List
+from src.database.tasks import get_dbs
 
 
 def class_helper(class_dict) -> dict:
@@ -17,6 +18,8 @@ async def get_classes(db_name: str) -> List[dict]:
     :param db_name:
     :return:
     """
+    db_names = await get_dbs()
+    assert db_name in db_names, "DB does not exist"
     database = client[db_name]
     classes_collection = database.get_collection("classes")
     classes = []
@@ -27,6 +30,8 @@ async def get_classes(db_name: str) -> List[dict]:
 
 # Add a new classes into to the database
 async def set_classes(classes_data: List[ClassSchema], db_name: str) -> List[str]:
+    db_names = await get_dbs()
+    assert db_name in db_names, "DB does not exist"
     database = client[db_name]
     classes_collection = database.get_collection("classes")
     num_documents = await classes_collection.count_documents({})
