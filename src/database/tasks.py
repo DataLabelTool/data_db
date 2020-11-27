@@ -9,7 +9,7 @@ from src.database.users import (
     set_roles_image_data, unset_roles_image_data
 )
 from src.database.users import collection as users_collection
-from src.models.users import User
+from src.models.users import User, UserDB
 from src.models.tasks import DBSchema, TaskSchema
 
 
@@ -100,6 +100,7 @@ async def delete_task(db_name: str, task_name: str) -> bool:
     task_names = await data_db.list_collection_names()
     assert task_name not in task_names, "task doesn't exist"
     async for user in users_collection.find():
+        user = UserDB(**user)
         await unset_roles_image_data(
             db_name=db_name,
             task_name=task_name,
@@ -132,9 +133,7 @@ async def add_db(db_name: str, user: User) -> bool:
     }
     result = await info_collection.insert_one(info)
     if result:
-        print('add classes')
         await set_roles_classes(db_name=db_name, permissions=['can_get', 'can_set'], user=user)
-        print('add tasks')
         await set_roles_tasks(db_name=db_name, permissions=['can_add', 'can_delete'], user=user)
         return True
     else:
@@ -150,8 +149,9 @@ async def delete_db(db_name: str) -> bool:
     db_names = await client.list_database_names()
     assert db_name in db_names, "DB doesn't exist"
     async for user in users_collection.find():
+        user = UserDB(**user)
         await unset_roles_classes(db_name=db_name, permissions=['can_get', 'can_set'], user=user)
-        await unset_roles_tasks(db_name=db_name, permissions=['can_get', 'can_set'], user=user)
+        await unset_roles_tasks(db_name=db_name, permissions=['can_add', 'can_delete'], user=user)
 
         await unset_roles_image_data(
             db_name=db_name,

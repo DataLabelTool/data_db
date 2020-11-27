@@ -109,7 +109,6 @@ async def add_db_route(
         db_name: str,
         user: User = Depends(fastapi_users.get_current_active_user)
 ):
-    """"""
     try:
         if user.can_add_dbs():
             result = await add_db(db_name=db_name, user=user)

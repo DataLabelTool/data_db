@@ -96,6 +96,7 @@ async def set_roles_classes(db_name: str, permissions: Union[str, List[str]], us
 
 
 async def unset_roles_classes(db_name: str, permissions: Union[str, List[str]], user: UserDB):
+    print(user)
     if isinstance(permissions, str):
         permissions = [permissions]
     for permission in permissions:
