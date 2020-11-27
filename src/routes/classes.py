@@ -27,13 +27,14 @@ async def set_classes_data(
     if user.can_set_classes(db_name=db_name):
         classes = jsonable_encoder(classes)
         new_classes = await set_classes(classes, db_name)
+        print("new_classes", new_classes)
         if new_classes:
             return ResponseModel(new_classes, "Classes added successfully.")
         else:
             return ErrorResponseModel(
                 "An error occurred",
                 404,
-                "db_name {0} doesn't exist".format(id)
+                "Can't set classes for this db"
             )
     else:
         return ErrorResponseModel(
@@ -56,7 +57,7 @@ async def get_classes_data(
             return ErrorResponseModel(
                 "An error occurred",
                 404,
-                "db_name {0} doesn't exist".format(id)
+                "Can't get classes for this db"
             )
     else:
         return ErrorResponseModel(

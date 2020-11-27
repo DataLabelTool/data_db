@@ -26,14 +26,14 @@ async def get_classes(db_name: str) -> List[dict]:
 
 
 # Add a new classes into to the database
-async def set_classes(classes_data: List[ClassSchema], db_name: str) -> str:
+async def set_classes(classes_data: List[ClassSchema], db_name: str) -> List[str]:
     database = client[db_name]
     classes_collection = database.get_collection("classes")
     num_documents = await classes_collection.count_documents({})
     if num_documents > 0:
-        result = await classes_collection.replace_many({}, classes_data)
+        result = await classes_collection.drop()
+        result = await classes_collection.insert_many(classes_data)
     else:
         result = await classes_collection.insert_many(classes_data)
-
-    return result.inserted_id
+    return [str(id) for id in result.inserted_ids]
 
