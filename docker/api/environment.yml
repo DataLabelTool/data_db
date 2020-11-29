@@ -1,4 +1,4 @@
-name: data_store
+name: data_db
 channels:
   - defaults
   - conda-forge

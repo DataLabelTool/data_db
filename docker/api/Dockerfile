@@ -21,7 +21,7 @@ RUN locale-gen en_US.UTF-8 ru_RU.UTF-8 && update-locale LANG="en_US.UTF-8" LANGU
 RUN curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 RUN bash Miniconda3-latest-Linux-x86_64.sh -b -p /root/conda
 ENV PATH "/root/conda/bin:$PATH"
-COPY docker/api/environment.yml /tmp/environment.yml
+COPY environment.yml /tmp/environment.yml
 RUN conda update -n base -c defaults conda && \
     conda env create -f environment.yml && \
     conda init bash && \
@@ -34,8 +34,7 @@ RUN mkdir /root/data_db
 RUN mkdir /root/data_db/logs
 WORKDIR /root/data_db
 
-COPY docker/api/supervisord /etc/supervisor/conf.d/
-COPY src /root/data_db/src/
+COPY supervisor /etc/supervisor/conf.d/
 
 RUN exec /bin/bash && conda activate data_db
 
