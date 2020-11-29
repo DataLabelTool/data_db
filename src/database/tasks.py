@@ -27,7 +27,7 @@ async def get_dbs() -> List[str]:
     return db_names
 
 
-async def get_user_tasks(user: User) -> DBSchema:
+async def get_user_tasks(user: User) -> List[TaskSchema]:
     if user.is_superuser:
         db_names = await get_dbs()
         tasks = []
@@ -35,17 +35,17 @@ async def get_user_tasks(user: User) -> DBSchema:
             task_names = await client[db_name].list_collection_names()
             task_names = list(filter(lambda x: x not in system_task_names, task_names))
             tasks.append(TaskSchema(db_name=db_name, task_names=task_names))
-        return DBSchema(db_names=tasks)
+        return tasks
     else:
         tasks = []
         for db_name, db_tasks in user.roles_image_data.items():
             task_names = db_tasks.keys()
             task_names = list(filter(lambda x: x not in system_task_names, task_names))
             tasks.append(TaskSchema(db_name=db_name, task_names=task_names))
-        return DBSchema(db_names=tasks)
+        return tasks
 
 
-async def get_db_tasks(db_name: str = None) -> DBSchema:
+async def get_db_tasks(db_name: str = None) -> List[TaskSchema]:
     if db_name is None:
         db_names = await get_dbs()
     else:
@@ -56,7 +56,7 @@ async def get_db_tasks(db_name: str = None) -> DBSchema:
         task_names = await client[db_name].list_collection_names()
         task_names = list(filter(lambda x: x not in system_task_names, task_names))
         tasks.append(TaskSchema(db_name=db_name, task_names=task_names))
-    return DBSchema(db_names=tasks)
+    return tasks
 
 
 async def add_task(db_name: str, task_name: str, user: User = None) -> bool:

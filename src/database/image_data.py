@@ -8,9 +8,9 @@ restricted_keys = ['items_state', 'predicted_items']
 
 async def check_task_exist(db_name: str, task_name: str):
     db_tasks = await get_db_tasks()
-    db_names = [db_tasks_name.db_name for db_tasks_name in db_tasks.db_names]
+    db_names = [db_tasks_name.db_name for db_tasks_name in db_tasks]
     assert db_name in db_names, "DB does not exist"
-    task_names = [db_task.task_names for db_task in db_tasks.db_names if db_task.db_name == db_name][0]
+    task_names = [db_task.task_names for db_task in db_tasks if db_task.db_name == db_name][0]
     assert task_name in task_names, "Task does not exist"
 
 # Get data ids
