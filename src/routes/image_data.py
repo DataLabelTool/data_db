@@ -70,9 +70,9 @@ async def add_image_data_route(
         user: User = Depends(fastapi_users.get_current_active_user)
 ):
     try:
-        if id is None:
+        image_data = jsonable_encoder(image_data, exclude_none=True)
+        if id is None and image_data.get("_id", None) is None:
             if user.can_add_image_data(db_name=db_name, task_name=task_name):
-                image_data = jsonable_encoder(image_data, exclude_none=True)
                 result = await add_image_data(
                     db_name=db_name,
                     task_name=task_name,
@@ -94,7 +94,6 @@ async def add_image_data_route(
         else:
             can_edit_protected = user.can_edit_protected_image_data(db_name=db_name, task_name=task_name)
             if user.can_edit_image_data(db_name=db_name, task_name=task_name) or can_edit_protected:
-                image_data = jsonable_encoder(image_data, exclude_none=True)
                 result = await update_image_data(
                     db_name=db_name,
                     task_name=task_name,

@@ -3,6 +3,9 @@ from src.database.base import client
 from src.database.tasks import get_dbs, get_db_tasks
 
 
+restricted_keys = ['items_state', 'predicted_items']
+
+
 async def check_task_exist(db_name: str, task_name: str):
     db_tasks = await get_db_tasks()
     db_names = [db_tasks_name.db_name for db_tasks_name in db_tasks.db_names]
@@ -55,7 +58,7 @@ async def update_image_data(db_name: str, task_name: str, id: str, image_data: d
     return False
 
 
-# Add a new student into to the database
+# Add a new image data into to the database
 async def add_image_data(db_name: str, task_name: str, image_data: dict) -> dict:
     await check_task_exist(db_name, task_name)
     database = client[db_name]
@@ -65,7 +68,7 @@ async def add_image_data(db_name: str, task_name: str, image_data: dict) -> dict
     return image_data_helper(new_image_data)
 
 
-# Delete a student from the database
+# Delete a image data from the database
 async def delete_image_data(db_name: str, task_name: str, id: str):
     await check_task_exist(db_name, task_name)
     database = client[db_name]
@@ -80,23 +83,41 @@ async def delete_image_data(db_name: str, task_name: str, id: str):
 
 def image_data_id_helper(image_data_dict: dict) -> dict:
     data = {
-        "id": str(image_data_dict["_id"])
+        "_id": str(image_data_dict["_id"])
     }
     return data
 
 
 def image_data_helper(image_data_dict: dict) -> dict:
     data = {
-        "id": str(image_data_dict["_id"]),
+        "_id": str(image_data_dict["_id"]),
         "image": image_data_dict["image"],
-        "items": image_data_dict["items"]
+        "items": image_data_dict["items"],
+        "items_graph": image_data_dict["items_graph"]
     }
-    #TODO: check other keys
+    for key, val in image_data_dict.items():
+        if key not in restricted_keys:
+            data[key] = val
     return data
 
 
 def image_data_check_protected(image_data_dict_left: dict, image_data_dict_right: dict) -> bool:
     """check"""
+    main_keys = ["_id", "image"]
+    for key in main_keys:
+        assert image_data_dict_left[key] == image_data_dict_right[key], "Keys are not equal with key: " + key
+    # check protected in items
+    left_items = [item for item in image_data_dict_left["items"] if item.get("protected", False)]
+    right_items = [item for item in image_data_dict_right["items"] if item.get("protected", False)]
+    for left in left_items:
+        left_id = left.get("id", None)
+        if left_id:
+            right_items_with_id = [right for right in right_items if right.get("id", None) == left_id]
 
-    #TODO: impelement method
+            for right in right_items_with_id:
+                assert left == right, "Protected items are changed id: " + right.get("id")
+    # check protected in items_graph
+    # TODO: now check items_graph not implemented
+    # check other keys
+    # TODO: now we are not need to check other keys
     return True
