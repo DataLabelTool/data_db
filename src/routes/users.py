@@ -46,7 +46,7 @@ fastapi_users = FastAPIUsers(
 
 jwt_auth_router = fastapi_users.get_auth_router(jwt_authentication)
 
-@jwt_auth_router.post("/auth/jwt/refresh")
+@jwt_auth_router.post("/refresh")
 async def refresh_jwt(response: Response, user=Depends(fastapi_users.get_current_active_user)):
     return await jwt_authentication.get_login_response(user, response)
 
