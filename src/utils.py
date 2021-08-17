@@ -16,6 +16,6 @@ def base_url() -> str:
 
     :return: Path object with base url
     """
-    base = os.getenv('API_BASE_URL', "http://localhost:8081")
+    base = os.getenv('API_BASE_URL', "")
     return base
 
